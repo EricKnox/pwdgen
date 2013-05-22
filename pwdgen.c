@@ -29,7 +29,7 @@
  * parameters:  in ipt: pointer to string
  * return: 1 for legal, or 0
  */
-int check (char *ipt)
+int check(char *ipt)
 {
         int in = 0, level = 0;
 
@@ -54,8 +54,8 @@ int check (char *ipt)
                                 --level;
                                 break;
                         case '-':
-                                if (in != 0 && (*(ipt - 1) == '[' || *(ipt + 1) == ']'
-                                        || *(ipt + 1) < *(ipt - 1))) return 0;
+                                if (in != 0 && (*(ipt - 1) == '[' || *(ipt + 1) == ']'||
+                                        *(ipt + 1) < *(ipt - 1))) return 0;
                                 break;
                         default:
                                 break;
