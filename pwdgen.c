@@ -83,7 +83,7 @@ int strfind(char tar, char *lst, int len)
  * function: randchar
  * description: generate one random character based on definition.
  * parameters: in_out ipt: pointer to string
- * return: length processed
+ * return: length processed(-1)
  */
 int randchar(char *ipt)
 {
@@ -118,7 +118,7 @@ int randchar(char *ipt)
  * function: generate
  * description: generate a password string.
  * parameters: in_out ipt: pointer to string
- * return: length processed
+ * return: length processed(-1)
  */
 int generate(char *ipt)
 {
