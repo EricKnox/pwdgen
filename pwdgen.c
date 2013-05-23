@@ -38,24 +38,23 @@ int check(char *ipt)
                         return 0;
                 switch (*ipt) {
                         case '[':
-                                if (in != 0) return 0;
+                                if (in) return 0;
                                 else in = 1;
                                 break;
                         case ']':
-                                if (in != 1 || *(ipt - 1) == ']') return 0;
+                                if (!in || ipt[-1] == '[') return 0;
                                 else in = 0;
                                 break;
                         case '(':
-                                if (in == 1) return 0;
+                                if (in) return 0;
                                 ++level;
                                 break;
                         case ')':
-                                if (in != 0 || level <= 0) return 0;
+                                if (in || level <= 0) return 0;
                                 --level;
                                 break;
                         case '-':
-                                if (in != 0 && (*(ipt - 1) == '[' || *(ipt + 1) == ']'||
-                                        *(ipt + 1) < *(ipt - 1))) return 0;
+                                if (in && (ipt[-1] == '[' || ipt[1] == ']' || ipt[1] < ipt[-1])) return 0;
                                 break;
                         default:
                                 break;
@@ -84,7 +83,7 @@ int strfind(char tar, char *lst, int len)
  * function: randchar
  * description: generate one random character based on definition.
  * parameters: in_out ipt: pointer to string
- * return: length processed(-1)
+ * return: length processed
  */
 int randchar(char *ipt)
 {
@@ -94,7 +93,7 @@ int randchar(char *ipt)
         
         for (; *ipt != ']'; ++ipt) {
                 if (*ipt == '-') {
-                        for (c = *(ipt - 1) + 1; c <= *(ipt + 1); ++c)
+                        for (c = ipt[-1] + 1; c <= ipt[1]; ++c)
                                 if (!strfind(c, chars, len))
                                         chars[len++] = c;
                         ++ipt;
@@ -104,7 +103,7 @@ int randchar(char *ipt)
                                 chars[len++] = *ipt;
         }
 
-        if (*(ipt + 1) == '*' && *(ipt + 2) > '0' && *(ipt + 2) <= '9')
+        if (ipt[1] == '*' && ipt[2] > '0' && ipt[2] <= '9')
                 c = strtol(ipt += 2, &ipt, 10);
         else {
                 c = 1;
@@ -119,7 +118,7 @@ int randchar(char *ipt)
  * function: generate
  * description: generate a password string.
  * parameters: in_out ipt: pointer to string
- * return: length processed(-1)
+ * return: length processed
  */
 int generate(char *ipt)
 {
@@ -133,8 +132,8 @@ int generate(char *ipt)
                                 ipt += generate(ipt);
                                 break;
                         case ')':
-                                if (time == 0)
-                                        if (*(ipt + 1) == '*' && *(ipt + 2) > '0' && *(ipt + 2) <= '9')
+                                if (!time)
+                                        if (ipt[1] == '*' && ipt[2] > '0' && ipt[2] <= '9')
                                                 time = strtol(ipt += 2, &ipt_exit, 10);
                                         else {
                                                 ++ipt;
@@ -180,7 +179,7 @@ int main(int argc, char **argv)
                 printf("Need password definition.\n");
                 return -1;
         }
-        if (!(flags & FLAG_TIME) || times == 0)
+        if (!(flags & FLAG_TIME) || !times)
                 times = 1;
 
         if (!check(ipt)) {
