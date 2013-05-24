@@ -10,6 +10,7 @@
 //         times.
 //      3. "-" in "[]" as A to B.
 //      4. rest of the characters in pattern printed directly.
+//      5. all characters following "\" are treated as normal ones.
 // example:
 //      ~$ pwdgen -p ([A-Za-z][0-9])*3
 //      s6B3i8
@@ -32,17 +33,18 @@
 int check(char *ipt)
 {
         int in = 0, level = 0;
+        char *ipt_origin = ipt;
 
         for (; *ipt != '\0'; ++ipt) {
-                if (*ipt < '!' || *ipt > '~')
-                        return 0;
+                if (*ipt < '!' || *ipt > '~') return 0;
                 switch (*ipt) {
                         case '[':
                                 if (in) return 0;
                                 else in = 1;
                                 break;
                         case ']':
-                                if (!in || ipt[-1] == '[') return 0;
+                                if (!in || ipt[-1] == '[' && ipt - ipt_origin >= 2 && ipt[-2] != '\\')
+                                        return 0;
                                 else in = 0;
                                 break;
                         case '(':
@@ -54,8 +56,13 @@ int check(char *ipt)
                                 --level;
                                 break;
                         case '-':
-                                if (in && (ipt[-1] == '[' || ipt[1] == ']' || ipt[1] < ipt[-1])) return 0;
+                                if (in && (ipt[-1] == '[' && ipt - ipt_origin >= 2 && ipt[-2] != '\\'
+                                        || ipt[1] == ']')) return 0;
+                                if ((ipt[1] == '\\' ? ipt[2] : ipt[1]) < ipt[-1]) return 0;
                                 break;
+                        case '\\':
+                                if (ipt[1] < '!' || ipt[1] > '~') return 0;
+                                ++ipt;
                         default:
                                 break;
                 }
@@ -87,20 +94,22 @@ int strfind(char tar, char *lst, int len)
  */
 int randchar(char *ipt)
 {
-        int c, len = 0;
+        int c, len = 0, end = 0;
         char chars[256] = {0};
-        char* ipt_origin = ipt;
+        char *ipt_origin = ipt;
         
         for (; *ipt != ']'; ++ipt) {
                 if (*ipt == '-') {
-                        for (c = ipt[-1] + 1; c <= ipt[1]; ++c)
+                        end = ipt[1] == '\\' ? ipt[2] : ipt[1];
+                        for (c = ipt[-1] + 1; c < end; ++c)
                                 if (!strfind(c, chars, len))
                                         chars[len++] = c;
-                        ++ipt;
                 }
-                else
+                else {
+                        if (*ipt == '\\') ++ipt;
                         if (!strfind(*ipt, chars, len))
                                 chars[len++] = *ipt;
+                } 
         }
 
         if (ipt[1] == '*' && ipt[2] > '0' && ipt[2] <= '9')
@@ -145,6 +154,8 @@ int generate(char *ipt)
                         case '[':
                                 ipt += randchar(++ipt);
                                 break;
+                        case '\\':
+                                ++ipt;
                         default:
                                 putchar(*ipt);
                                 break;
