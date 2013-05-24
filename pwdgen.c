@@ -137,7 +137,7 @@ int generate(char *ipt)
                                                 time = strtol(ipt += 2, &ipt_exit, 10);
                                         else {
                                                 ++ipt;
-                                                return ipt - ipt_origin;
+                                                return ipt - ipt_origin - 1;
                                         }
                                 if (++t < time) ipt = ipt_origin - 1;
                                 else return ipt_exit - ipt_origin - 1;
@@ -151,6 +151,28 @@ int generate(char *ipt)
                 }
         }
         return ipt - ipt_origin;
+}
+
+/*
+ * function: init_random
+ * description: set random seed.
+ * parameters: no
+ * return: void
+ */
+void init_random(void)
+{
+        FILE* urandom;
+        unsigned int seed, i;
+        
+        urandom = fopen("/dev/urandom", "r");
+        if (!urandom) {
+                perror("Failure opening random file");
+                exit(EXIT_FAILURE);
+        }
+        
+        for (i = 10; --i;)
+                fread(&seed, sizeof(seed), 1, urandom);
+        srand(seed);
 }
 
 // entry point
@@ -187,7 +209,7 @@ int main(int argc, char **argv)
                 return -2;
         }
         
-        srand((int)time(NULL));
+        init_random();
         while (times--) {
                 ipt = ipt_origin;
                 generate(ipt);
