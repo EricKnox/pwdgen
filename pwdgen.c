@@ -172,7 +172,7 @@ int generate(char *ipt)
  */
 void init_random(void)
 {
-        FILE* urandom;
+        FILE *urandom;
         unsigned int seed, i;
         
         urandom = fopen("/dev/urandom", "r");
@@ -181,8 +181,7 @@ void init_random(void)
                 exit(EXIT_FAILURE);
         }
         
-        for (i = 10; --i;)
-                fread(&seed, sizeof(seed), 1, urandom);
+        fread(&seed, sizeof(seed), 1, urandom);
         srand(seed);
 }
 
